@@ -1,0 +1,65 @@
+{
+    "07:30 - 08:30": {
+        "Monday": "Class 8-A",
+        "Tuesday": "Class 8-A",
+        "Wednesday": "",
+        "Thursday": "",
+        "Friday": ""
+    },
+    "08:30 - 09:30": {
+        "Monday": "Hey world",
+        "Tuesday": "My God",
+        "Wednesday": "Ok please!",
+        "Thursday": "",
+        "Friday": "Ok please!"
+    },
+    "09:30 - 10:30": {
+        "Monday": "Ok please!",
+        "Tuesday": "Class 8-A",
+        "Wednesday": "",
+        "Thursday": "Ok please!",
+        "Friday": ""
+    },
+    "10:30 - 11:30": {
+        "Monday": "Class 8-A",
+        "Tuesday": "",
+        "Wednesday": "Class 8-A",
+        "Thursday": "",
+        "Friday": ""
+    },
+    "11:30 - 12:30": {
+        "Monday": "Class 8-A",
+        "Tuesday": "",
+        "Wednesday": "",
+        "Thursday": "",
+        "Friday": ""
+    },
+    "12:30 - 13:30": {
+        "Monday": "Free",
+        "Tuesday": "Hey mine",
+        "Wednesday": "",
+        "Thursday": "Class 8-A",
+        "Friday": ""
+    },
+    "13:30 - 14:30": {
+        "Monday": "Free",
+        "Tuesday": "",
+        "Wednesday": "Okay go",
+        "Thursday": "",
+        "Friday": ""
+    },
+    "14:30 - 15:30": {
+        "Monday": "Free",
+        "Tuesday": "",
+        "Wednesday": "",
+        "Thursday": "Ok please!",
+        "Friday": ""
+    },
+    "15:30 - 16:30": {
+        "Monday": "Free",
+        "Tuesday": "",
+        "Wednesday": "",
+        "Thursday": "",
+        "Friday": ""
+    }
+}
