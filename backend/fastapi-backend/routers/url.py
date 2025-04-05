@@ -15,6 +15,7 @@ from helper_functions.timetable_api.ocr_functionality import process_cropped_ima
 import uuid
 import cv2
 import os
+from models.question_generate_model import QuestionGenerationRequest
 PDF_STORAGE_DIR="uploaded_pdfs"
 os.makedirs(PDF_STORAGE_DIR,exist_ok=True)
 router = APIRouter()
@@ -94,3 +95,10 @@ async def upload_pdf(pdf_file:UploadFile=File(...)):
         f.write(await pdf_file.read())
 
     return {"file_id": file_id, "message": "PDF uploaded successfully"}
+@router.post("/api/generate-questions")
+async def generate_questions(request: QuestionGenerationRequest):
+    file_path = os.path.join(PDF_STORAGE_DIR, f"{request.file_id}.pdf")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Please try uploading the pdf again")
+    
