@@ -78,7 +78,7 @@ def process_cropped_image(img)->dict:
     # Assume fixed days (make this dynamic if needed)
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     day_headers = rows[0][:]
-    print("Day headers detected:", day_headers)
+    
 
     day_x_ranges = {}
     for day, (startX, endX, _, _, text) in zip(days, day_headers):

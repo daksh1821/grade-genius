@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-for key, value in os.environ.items():
-    print(f"{key} = {value}")
+# for key, value in os.environ.items():
+#     print(f"{key} = {value}")
 def load_model():
     llm=ChatGoogleGenerativeAI(
         model="gemini-2.0-flash-lite",

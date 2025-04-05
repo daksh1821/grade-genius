@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Proctored Exam Portal</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: #f4f4f4;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .question {
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    textarea, select, input[type="text"] {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    video {
+      margin-top: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1 id="exam-title"></h1>
+  <p id="instructions"></p>
+  <form id="exam-form">
+    <div id="questions-container"></div>
+    <button type="submit">Submit Answers</button>
+  </form>
+
+  <h2>Live Proctoring Snapshot</h2>
+  <video id="video" autoplay playsinline width="320" height="240"></video>
+  <canvas id="canvas" style="display: none;"></canvas>
+
+  <script>
+    const API = "http://localhost:8000";
+    
+    async function fetchExamData() {
+      const res = await fetch(`${API}/exam`);
+      return await res.json();
+    }
+    
+    function renderExam(examData) {
+      document.getElementById("exam-title").textContent = examData.title;
+      document.getElementById("instructions").textContent = examData.instructions;
+    
+      const container = document.getElementById("questions-container");
+      container.innerHTML = "";
+    
+      examData.questions.forEach(q => {
+        const qDiv = document.createElement("div");
+        qDiv.className = "question";
+    
+        let html = `<p><strong>Q${q.id}:</strong> ${q.question}</p>`;
+    
+        if (q.type === 'multiple_choice') {
+          q.options.forEach((opt, idx) => {
+            const id = `q${q.id}_opt${idx}`;
+            html += `<div><input type="radio" name="q${q.id}" id="${id}" value="${opt}"><label for="${id}">${opt}</label></div>`;
+          });
+        } else {
+          html += `<textarea name="q${q.id}" required></textarea>`;
+        }
+    
+        qDiv.innerHTML = html;
+        container.appendChild(qDiv);
+      });
+    }
+    
+    document.getElementById("exam-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const answers = {};
+      for (const [key, value] of formData.entries()) {
+        answers[key] = value;
+      }
+    
+      await fetch(`${API}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers })
+      });
+    
+      alert("Answers submitted successfully!");
+    });
+    
+    // Webcam snapshot capture every 10 sec without refresh
+    const video = document.getElementById("video");
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+      setInterval(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL("image/png");
+        const timestamp = new Date().toISOString();
+    
+        fetch(`${API}/snapshot`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: imageData, timestamp })
+        });
+      }, 10000);
+    }).catch(err => {
+      alert("Webcam access denied.");
+    });
+    
+    // Tab visibility
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        const timestamp = new Date().toISOString();
+        fetch(`${API}/log-event`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event: "Tab switch detected", timestamp })
+        });
+        alert("Warning: Switching tabs is not allowed!");
+      }
+    });
+    
+    // Audio detection
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      const audioCtx = new AudioContext();
+      const mic = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      mic.connect(analyser);
+      const data = new Uint8Array(analyser.fftSize);
+    
+      setInterval(() => {
+        analyser.getByteFrequencyData(data);
+        const volume = data.reduce((a, b) => a + b) / data.length;
+        if (volume > 50) {
+          const timestamp = new Date().toISOString();
+          fetch(`${API}/log-audio`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ level: "high", timestamp })
+          });
+        }
+      }, 5000);
+    });
+    fetchExamData().then(renderExam);
+
+    </script>
+    
+</body>
+</html>
