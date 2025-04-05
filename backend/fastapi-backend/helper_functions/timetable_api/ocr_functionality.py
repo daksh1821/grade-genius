@@ -4,7 +4,8 @@ import re
 # import difflib
 import tempfile
 import cv2
-from logger import logger
+import os
+from utils.logger import logger
 # def is_monday_variant(text):
 #     '''
 #     This function checks whether there is around 
@@ -29,9 +30,14 @@ def process_cropped_image(img)->dict:
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
 
     # Write image temporarily to memory for OCR
-    with tempfile.NamedTemporaryFile(suffix=".png") as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".png",delete=False) as tmp:
+        tmp_path = tmp.name
         cv2.imwrite(tmp.name, img)
+    try:
         results = ocr.ocr(tmp.name, cls=True)
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
     logger.info("OCR processing completed.")
 
@@ -90,7 +96,7 @@ def process_cropped_image(img)->dict:
                     timetable_json[time_slot][day] = text
                     break
 
-    print(json.dumps(timetable_json, indent=4))
+    # print(json.dumps(timetable_json, indent=4))
     with open("timetable.json", "w") as f:
         json.dump(timetable_json, f, indent=4)
 

@@ -5,7 +5,7 @@ from fastapi import (
     UploadFile
 )
 from fastapi.middleware.cors import CORSMiddleware
-from logger import logger
+from utils.logger import logger
 from routers import url
 import uvicorn 
 @asynccontextmanager

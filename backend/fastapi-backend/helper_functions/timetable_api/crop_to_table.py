@@ -1,5 +1,5 @@
 import cv2
-from logger import logger
+from utils.logger import logger
 import numpy as np
 # def auto_crop_table(image_path: str, output_path: str = 'cropped_table.png') -> str:
 #     """

@@ -11,7 +11,7 @@ from fastapi.responses import (
 import asyncio
 import fitz
 import numpy as np
-from logger import logger
+from utils.logger import logger
 from helper_functions.timetable_api.crop_to_table import auto_crop_table
 from helper_functions.timetable_api.ocr_functionality import process_cropped_image
 import uuid
