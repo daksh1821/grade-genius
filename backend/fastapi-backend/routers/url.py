@@ -14,6 +14,7 @@ import numpy as np
 from utils.logger import logger
 from helper_functions.timetable_api.crop_to_table import auto_crop_table
 from helper_functions.timetable_api.ocr_functionality import process_cropped_image
+from helper_functions.generate_testpaper_api.model import handle_user_conversations
 import uuid
 import cv2
 import os
@@ -110,11 +111,21 @@ async def generate_questions(request: QuestionGenerationRequest):
                 if 0 <= page_num < len(doc):
                     text += doc[page_num].get_text()
         return text
+    logger.info(f"Extracting text from pages: {request.selected_pages}")
     text=await asyncio.to_thread(extract_text)
-    return {
-        "extracted_text_preview": text[:500],  # Just to test
-        "question_types": request.question_types,
-        "class_level": request.class_level,
-        "chapter_background": request.chapter_background
-    }
+    logger.info("Text extraction completed.")
+    output=handle_user_conversations(
+        question_types=request.question_types,
+        context=text,
+        class_level=request.class_level,
+        chapter_background=request.chapter_background
+    )
+    return output.content
+
+    # return {
+    #     "extracted_text_preview": text[:500],  # Just to test
+    #     "question_types": request.question_types,
+    #     "class_level": request.class_level,
+    #     "chapter_background": request.chapter_background
+    # }
     # this text along with input stuff will be passed to the llm
