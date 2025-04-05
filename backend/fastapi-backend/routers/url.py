@@ -1,28 +1,30 @@
 from fastapi import (
     APIRouter,
-    Request,
     status,
     HTTPException,
     File,
     UploadFile
 )
 from fastapi.responses import (
-    JSONResponse,
     RedirectResponse
 )
 import numpy as np
 from logger import logger
 from helper_functions.timetable_api.crop_to_table import auto_crop_table
 from helper_functions.timetable_api.ocr_functionality import process_cropped_image
+import uuid
 import cv2
+import os
+PDF_STORAGE_DIR="uploaded_pdfs"
+os.makedirs(PDF_STORAGE_DIR,exist_ok=True)
+router = APIRouter()
+
 # import aiofiles
 # from pathlib import Path
 # from uuid import uuid4
 
 # UPLOAD_DIR = Path("uploads") # Path /uploads/
 # UPLOAD_DIR.mkdir(exist_ok=True)
-
-router = APIRouter()
 
 @router.get("/")
 async def redirect_to_docs():
@@ -81,3 +83,14 @@ async def upload_image(file: UploadFile = File(...)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error: {str(e)}"
         )
+
+@router.post("/api/upload-pdf")
+async def upload_pdf(pdf_file:UploadFile=File(...)):
+    file_id = str(uuid.uuid4())
+    file_path = os.path.join(PDF_STORAGE_DIR, f"{file_id}.pdf")
+
+
+    with open(file_path, "wb") as f:
+        f.write(await pdf_file.read())
+
+    return {"file_id": file_id, "message": "PDF uploaded successfully"}
