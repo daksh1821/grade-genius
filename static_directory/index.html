@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Exam Portal</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: #f4f4f4;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .question {
+      background: #fff;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin-top: 0.5rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="exam-title"></h1>
+  <p id="instructions"></p>
+  <form id="exam-form">
+    <div id="questions-container"></div>
+    <button type="submit">Submit Answers</button>
+  </form>
+
+  <script>
+    const examData = {
+      "title": "Midterm Examination - Mathematics",
+      "instructions": "Answer all questions. Each question carries equal marks.",
+      "questions": [
+        {
+          "id": 1,
+          "type": "short_answer",
+          "question": "Define a function in mathematics with an example."
+        },
+        {
+          "id": 2,
+          "type": "multiple_choice",
+          "question": "Which of the following is a prime number?",
+          "options": ["4", "6", "9", "11"]
+        },
+        {
+          "id": 3,
+          "type": "long_answer",
+          "question": "Explain the concept of limits in calculus."
+        }
+      ]
+    };
+
+    document.getElementById("exam-title").textContent = examData.title;
+    document.getElementById("instructions").textContent = examData.instructions;
+
+    const container = document.getElementById("questions-container");
+
+    examData.questions.forEach(q => {
+      const qDiv = document.createElement("div");
+      qDiv.className = "question";
+
+      const label = document.createElement("label");
+      label.innerHTML = `<strong>Q${q.id}:</strong> ${q.question}`;
+      qDiv.appendChild(label);
+
+      if (q.type === "multiple_choice") {
+        q.options.forEach((opt, idx) => {
+          const optionId = `q${q.id}_opt${idx}`;
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = `q${q.id}`;
+          radio.value = opt;
+          radio.id = optionId;
+
+          const radioLabel = document.createElement("label");
+          radioLabel.htmlFor = optionId;
+          radioLabel.textContent = opt;
+
+          qDiv.appendChild(document.createElement("br"));
+          qDiv.appendChild(radio);
+          qDiv.appendChild(radioLabel);
+        });
+      } else {
+        const input = document.createElement("textarea");
+        input.name = `q${q.id}`;
+        input.placeholder = "Your answer here...";
+        qDiv.appendChild(document.createElement("br"));
+        qDiv.appendChild(input);
+      }
+
+      container.appendChild(qDiv);
+    });
+
+    document.getElementById("exam-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const answers = {};
+      for (let [key, value] of formData.entries()) {
+        answers[key] = value;
+      }
+      console.log("Submitted Answers:", answers);
+      alert("Your answers have been submitted!");
+    });
+  </script>
+</body>
+</html>

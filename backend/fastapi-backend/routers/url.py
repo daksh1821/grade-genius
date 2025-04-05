@@ -8,6 +8,7 @@ from fastapi import (
 from fastapi.responses import (
     RedirectResponse
 )
+import json
 import asyncio
 import fitz
 import numpy as np
@@ -120,7 +121,21 @@ async def generate_questions(request: QuestionGenerationRequest):
         class_level=request.class_level,
         chapter_background=request.chapter_background
     )
-    return output.content
+    try:
+        raw = output.content
+
+        # Step 1: Convert escaped characters into proper string (e.g., "\n" to actual newline)
+        raw = raw.encode('utf-8').decode('unicode_escape')
+
+        # Step 2: Remove markdown syntax like ```json ... ```
+        cleaned = raw.strip().replace("```json", "").replace("```", "").strip()
+
+        # Step 3: Now it's safe to parse as JSON
+        parsed = json.loads(cleaned)
+
+        return parsed
+    except json.JSONDecodeError as e:
+        return {"error":"Json Decode Failed","details":str(e)}
 
     # return {
     #     "extracted_text_preview": text[:500],  # Just to test
