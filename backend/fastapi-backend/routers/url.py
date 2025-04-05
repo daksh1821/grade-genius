@@ -8,6 +8,8 @@ from fastapi import (
 from fastapi.responses import (
     RedirectResponse
 )
+import asyncio
+import fitz
 import numpy as np
 from logger import logger
 from helper_functions.timetable_api.crop_to_table import auto_crop_table
@@ -101,4 +103,18 @@ async def generate_questions(request: QuestionGenerationRequest):
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Please try uploading the pdf again")
-    
+    def extract_text():
+        text = ""
+        with fitz.open(file_path) as doc:
+            for page_num in request.selected_pages:
+                if 0 <= page_num < len(doc):
+                    text += doc[page_num].get_text()
+        return text
+    text=await asyncio.to_thread(extract_text)
+    return {
+        "extracted_text_preview": text[:500],  # Just to test
+        "question_types": request.question_types,
+        "class_level": request.class_level,
+        "chapter_background": request.chapter_background
+    }
+    # this text along with input stuff will be passed to the llm
