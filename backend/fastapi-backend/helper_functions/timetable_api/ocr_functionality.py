@@ -1,19 +1,21 @@
 from paddleocr import PaddleOCR
 import json
 import re
-import difflib
-
-def is_monday_variant(text):
-    '''
-    This function checks whether there is around 
-    75% match with Monday (that's) our starting point
-    '''
-    text = text.strip().lower()
-    candidates = ["mon", "monday"]
+# import difflib
+import tempfile
+import cv2
+from logger import logger
+# def is_monday_variant(text):
+#     '''
+#     This function checks whether there is around 
+#     75% match with Monday (that's) our starting point
+#     '''
+#     text = text.strip().lower()
+#     candidates = ["mon", "monday"]
     
-    best_match = difflib.get_close_matches(text, candidates, n=1, cutoff=0.75)
+#     best_match = difflib.get_close_matches(text, candidates, n=1, cutoff=0.75)
     
-    return len(best_match) > 0
+#     return len(best_match) > 0
 def is_monday_variant_regex(text: str) -> bool:
     '''
     ^ and $ ensure it matches the full word.
@@ -23,9 +25,15 @@ def is_monday_variant_regex(text: str) -> bool:
     '''
     pattern = r'^(mon(day)?)$'
     return bool(re.match(pattern, text.strip(), re.IGNORECASE))
-def process_cropped_image(img_path:str)->json:
+def process_cropped_image(img)->dict:
     ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
-    results = ocr.ocr(img_path, cls=True)
+
+    # Write image temporarily to memory for OCR
+    with tempfile.NamedTemporaryFile(suffix=".png") as tmp:
+        cv2.imwrite(tmp.name, img)
+        results = ocr.ocr(tmp.name, cls=True)
+
+    logger.info("OCR processing completed.")
 
     text_entries = []
     text_like_monday_found = False
