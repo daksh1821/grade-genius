@@ -1,5 +1,16 @@
 from langchain_core.prompts import ChatPromptTemplate
-
+# json_example = """```json
+# {{
+#   "MCQ": [
+#     {{"question": "What is the unit of current?", "options": ["Ampere", "Volt", "Ohm", "Watt"], "answer": "Ampere"}},
+#     ...
+#   ],
+#   "short_answer": [
+#     {{"question": "Explain the concept of electric circuit."}},
+#     ...
+#   ]
+# }}
+# ```"""
 prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -15,7 +26,7 @@ Generate questions based on the following criteria:
 - Class Level: {class_level}
 - Chapter Background: {chapter_background}
 - Question Requirements: {question_types}
-
+Also, you must always generate questions in json format 
 Use the following context to generate the questions:
 {context}
             """

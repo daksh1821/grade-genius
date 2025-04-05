@@ -2,9 +2,16 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from helper_functions.generate_testpaper_api.template import prompt
 from utils.logger import logger
+from langchain_core.output_parsers import JsonOutputParser
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+for key, value in os.environ.items():
+    print(f"{key} = {value}")
 def load_model():
     llm=ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash-latest",
+        model="gemini-2.0-flash-lite",
         temperature=0.85,
         max_tokens=None,
         timeout=None,
@@ -14,6 +21,7 @@ def load_model():
 def handle_user_conversations(question_types, context, class_level, chapter_background):
     logger.info("Loading model...")
     llm=load_model()
+
     chain=prompt|llm
     logger.info("Generating questions with the following parameters:")
     logger.info(f"Question Types: {question_types}")
