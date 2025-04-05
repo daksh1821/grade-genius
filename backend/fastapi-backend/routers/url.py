@@ -8,6 +8,8 @@ from fastapi import (
 from fastapi.responses import (
     RedirectResponse
 )
+import asyncio
+import fitz
 import numpy as np
 from logger import logger
 from helper_functions.timetable_api.crop_to_table import auto_crop_table
@@ -15,6 +17,7 @@ from helper_functions.timetable_api.ocr_functionality import process_cropped_ima
 import uuid
 import cv2
 import os
+from models.question_generate_model import QuestionGenerationRequest
 PDF_STORAGE_DIR="uploaded_pdfs"
 os.makedirs(PDF_STORAGE_DIR,exist_ok=True)
 router = APIRouter()
@@ -94,3 +97,24 @@ async def upload_pdf(pdf_file:UploadFile=File(...)):
         f.write(await pdf_file.read())
 
     return {"file_id": file_id, "message": "PDF uploaded successfully"}
+@router.post("/api/generate-questions")
+async def generate_questions(request: QuestionGenerationRequest):
+    file_path = os.path.join(PDF_STORAGE_DIR, f"{request.file_id}.pdf")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Please try uploading the pdf again")
+    def extract_text():
+        text = ""
+        with fitz.open(file_path) as doc:
+            for page_num in request.selected_pages:
+                if 0 <= page_num < len(doc):
+                    text += doc[page_num].get_text()
+        return text
+    text=await asyncio.to_thread(extract_text)
+    return {
+        "extracted_text_preview": text[:500],  # Just to test
+        "question_types": request.question_types,
+        "class_level": request.class_level,
+        "chapter_background": request.chapter_background
+    }
+    # this text along with input stuff will be passed to the llm

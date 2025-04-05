@@ -1,0 +1,7 @@
+- time table ocr
+- class Notes (what they taught)
+- Custom assginemnt creation(No overpriced platforms)
+- One click Assignment sharing
+- Upload student Details with a photo
+- Student recieve personaozed report on performance
+- Teacher get deep insights of what students are doing etc.
