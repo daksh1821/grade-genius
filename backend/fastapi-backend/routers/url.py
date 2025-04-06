@@ -8,6 +8,7 @@ from fastapi import (
 from fastapi.responses import (
     RedirectResponse
 )
+
 import json
 import asyncio
 import fitz
@@ -24,8 +25,9 @@ PDF_STORAGE_DIR="uploaded_pdfs"
 os.makedirs(PDF_STORAGE_DIR,exist_ok=True)
 router = APIRouter()
 
-# import aiofiles
-# from pathlib import Path
+import aiofiles
+from pathlib import Path
+DATA_FILE=Path("questions.json") #stimulation
 # from uuid import uuid4
 
 # UPLOAD_DIR = Path("uploads") # Path /uploads/
@@ -34,6 +36,15 @@ router = APIRouter()
 @router.get("/")
 async def redirect_to_docs():
     return RedirectResponse(url="/docs")
+@router.get("/questions")
+async def get_questions():
+    if not DATA_FILE.exists():
+        raise HTTPException(status_code=404,detail='No questions generated')
+    async with aiofiles.open(DATA_FILE, "r") as f:
+        content = await f.read()
+        data = json.loads(content)
+
+    return data
 
 @router.post("/api/timetable/upload-image")
 async def upload_image(file: UploadFile = File(...)):
@@ -132,6 +143,10 @@ async def generate_questions(request: QuestionGenerationRequest):
 
         # Step 3: Now it's safe to parse as JSON
         parsed = json.loads(cleaned)
+        async with aiofiles.open(DATA_FILE, "w") as f:
+            await f.write(json.dumps(parsed))
+
+        
 
         return parsed
     except json.JSONDecodeError as e:
