@@ -8,6 +8,8 @@ from fastapi import (
 from fastapi.responses import (
     RedirectResponse
 )
+import smtplib
+from email.message import EmailMessage
 
 import json
 import asyncio
@@ -20,7 +22,12 @@ from helper_functions.generate_testpaper_api.model import handle_user_conversati
 import uuid
 import cv2
 import os
+from dotenv import load_dotenv
+load_dotenv()
+EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_PASS = os.getenv("EMAIL_PASS")
 from models.question_generate_model import QuestionGenerationRequest
+from models.mailrouter import EmailRequest
 PDF_STORAGE_DIR="uploaded_pdfs"
 os.makedirs(PDF_STORAGE_DIR,exist_ok=True)
 router = APIRouter()
@@ -159,3 +166,20 @@ async def generate_questions(request: QuestionGenerationRequest):
     #     "chapter_background": request.chapter_background
     # }
     # this text along with input stuff will be passed to the llm
+### MAIL SENDING SERVICE
+@router.post("/send-mail")
+def send_mail(req: EmailRequest):
+    try: 
+        msg = EmailMessage()
+        msg['Subject'] = req.subject
+        msg['From'] = EMAIL_USER
+        msg['To'] = req.to
+        msg.set_content(req.body)
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(EMAIL_USER, EMAIL_PASS)
+            smtp.send_message(msg)
+
+        return {"status": "sent"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Email failed: {str(e)}")
